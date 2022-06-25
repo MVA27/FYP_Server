@@ -11,9 +11,6 @@
     $user_password = $_REQUEST['userPassword'];
     $age = $_REQUEST['age'];
     $phone_number = $_REQUEST['phoneNumber'];
-
-    //echo "user name : $user_name <br>";
-    //echo "user password : $user_password <br>";
     
 	$file = fopen("../Configuration-Files/database.config", "r") or die("Unable to open database.config file!");
     $IP_ADDRESS = chop(fgets($file));
