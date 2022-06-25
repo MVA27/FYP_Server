@@ -12,7 +12,6 @@
     $USER_NAME = chop(fgets($file));
     $PASSWORD = chop(fgets($file));
     $DATABASE = chop(fgets($file));
-
 	$connection = mysqli_connect($IP_ADDRESS,$USER_NAME,$PASSWORD,$DATABASE);
 
 	$query = "TRUNCATE TABLE $table_name";
