@@ -9,6 +9,9 @@
 	$last_name = $_REQUEST['lastName'];
     $user_name = $_REQUEST['userName'];
     $user_password = $_REQUEST['userPassword'];
+
+    $user_password = sha1($user_password);
+
     $age = $_REQUEST['age'];
     $phone_number = $_REQUEST['phoneNumber'];
     

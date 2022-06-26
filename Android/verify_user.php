@@ -25,7 +25,7 @@
 		
 		$db_password = $row['password'];
 		
-		if($db_password == $user_password){
+		if($db_password ==  sha1($user_password)){
 		    http_response_code(200);
 		}
 		else{
