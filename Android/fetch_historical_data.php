@@ -14,7 +14,7 @@
             public $humidity;
             public $air_quality;
             
-            //public $status;
+            public $status;
         }
         
         $parameterArray = array();
@@ -26,9 +26,10 @@
         $PASSWORD = chop(fgets($file));
         $DATABASE = chop(fgets($file));
     
-    	$connection = mysqli_connect($IP_ADDRESS,$USER_NAME,$PASSWORD,$DATABASE);
+        $connection = mysqli_connect($IP_ADDRESS,$USER_NAME,$PASSWORD,$DATABASE);
     
-        $query="SELECT * FROM parameters";
+        //$query="SELECT * FROM parameters";
+        $query="SELECT day,month,year,hours,minutes,seconds,p.temperature,p.pressure,p.humidity,p.air_quality,s.status FROM parameters p INNER JOIN status s ON p.srno = s.srno;";
     
         $result = mysqli_query($connection,$query);
         
@@ -49,7 +50,7 @@
                 $parameters->humidity = $row['humidity'];
                 $parameters->air_quality = $row['air_quality'];
                 
-                //$parameters->status = $row['status'];
+                $parameters->status = $row['status'];
                 
                 array_push($parameterArray,$parameters);
             }
