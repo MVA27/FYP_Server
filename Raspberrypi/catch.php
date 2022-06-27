@@ -1,6 +1,15 @@
 <?php
+
+	$file = fopen("../Configuration-Files/database.config", "r") or die("Unable to open database.config file!");
+    $IP_ADDRESS = chop(fgets($file));
+    $USER_NAME = chop(fgets($file));
+    $PASSWORD = chop(fgets($file));
+    $DATABASE = chop(fgets($file));
+	$connection = mysqli_connect($IP_ADDRESS,$USER_NAME,$PASSWORD,$DATABASE);
+
+	//For Blank Request (without data), just send flag values
     if(count($_REQUEST) == 0){
-	    http_response_code(400);
+	    returnFlags($connection);
 	    exit(0);
 	}
 
@@ -16,13 +25,6 @@
 	$hours = date('h');
 	$minutes = date('i');
 	$seconds = date('s');
-	
-	$file = fopen("../Configuration-Files/database.config", "r") or die("Unable to open database.config file!");
-    $IP_ADDRESS = chop(fgets($file));
-    $USER_NAME = chop(fgets($file));
-    $PASSWORD = chop(fgets($file));
-    $DATABASE = chop(fgets($file));
-	$connection = mysqli_connect($IP_ADDRESS,$USER_NAME,$PASSWORD,$DATABASE);
 
 	$query = "INSERT INTO parameters(day,month,year,hours,minutes,seconds,temperature,pressure,humidity,air_quality) VALUES ($day,$month,$year,$hours,$minutes,$seconds,$temperature,$pressure,$humidity,$airQuality)";
 	
@@ -36,21 +38,26 @@
 			//Update Status Table 
 			updateStatusTable($temperature,$pressure,$humidity,$airQuality,$connection);
 
-			//Return a response 
-		    $query = "SELECT * FROM flags";
-		    $result = mysqli_query($connection,$query);
-		    
-		    if($result){ // If the flags are successfully fetched
-		        $row = mysqli_fetch_array($result);
-		        $sleep = $row['sleep'];
-		        echo "{sleep: $sleep}";
-		    }
+			//Return all flags as a response 
+		    returnFlags($connection);
 		    
 		}
 		
 	}
 	else{
 		echo "error";
+	}
+
+	function returnFlags($connection){
+		$query = "SELECT * FROM flags";
+		$result = mysqli_query($connection,$query);
+		    
+		if($result){ // If the flags are successfully fetched
+		    $row = mysqli_fetch_array($result);
+		    $sleep = $row['sleep'];
+		    $terminate = $row['terminate'];
+		    echo "{sleep: $sleep, terminate: $terminate}";
+		}
 	}
 
 	function updateStatusTable($temperature,$pressure,$humidity,$airQuality,$connection){
