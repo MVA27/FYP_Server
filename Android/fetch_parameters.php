@@ -7,7 +7,7 @@
 
 	$connection = mysqli_connect($IP_ADDRESS,$USER_NAME,$PASSWORD,$DATABASE);
 
-	$query = "SELECT * FROM parameters WHERE srno=(SELECT MAX(srno) FROM parameters)";
+	$query = "SELECT * FROM real_time_parameters WHERE srno=1";
 
 	$result = mysqli_query($connection,$query);
 	

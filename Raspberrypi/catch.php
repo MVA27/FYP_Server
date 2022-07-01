@@ -1,5 +1,16 @@
 <?php
 
+	/**
+	 * When this file is called (i.e catch.php) First check: 
+	 * 	If no parameters are passed in $_REQUEST array 
+	 * 		- return flags and exit
+	 * 
+	 * 	If terminate flag is 1 
+	 * 		- Dont update the 'parameters' table with received values
+	 * 		- Update 'real_time_parameters' table with 0s
+	 * , 	- return flags
+	 * */
+
 	$file = fopen("../Configuration-Files/database.config", "r") or die("Unable to open database.config file!");
     $IP_ADDRESS = chop(fgets($file));
     $USER_NAME = chop(fgets($file));
@@ -13,6 +24,15 @@
 	    exit(0);
 	}
 
+	//If terminate flag is 1, return flags and exit 
+	if(isTerminated($connection)){
+		$query = "UPDATE real_time_parameters SET temperature=0,pressure=0,humidity=0,air_quality=-1 WHERE srno=1";
+		$result = mysqli_query($connection,$query);
+		returnFlags($connection);
+	    exit(0);
+	}
+
+	//Extract parameters from HTTP message
     $temperature = $_REQUEST['t'];
     $pressure = $_REQUEST['p'];
     $humidity = $_REQUEST['h'];
@@ -26,27 +46,29 @@
 	$minutes = date('i');
 	$seconds = date('s');
 
-	$query = "INSERT INTO parameters(day,month,year,hours,minutes,seconds,temperature,pressure,humidity,air_quality) VALUES ($day,$month,$year,$hours,$minutes,$seconds,$temperature,$pressure,$humidity,$airQuality)";
+	//Query for 'parameters' table
+	$query1 = "INSERT INTO parameters(day,month,year,hours,minutes,seconds,temperature,pressure,humidity,air_quality) VALUES ($day,$month,$year,$hours,$minutes,$seconds,$temperature,$pressure,$humidity,$airQuality)";
+
+	//Query for 'real_time_parameters' table
+	$query2 = "UPDATE real_time_parameters SET temperature=$temperature,pressure=$pressure,humidity=$humidity,air_quality=$airQuality WHERE srno=1";
 	
+
 	if($connection){
 
-		$result = mysqli_query($connection,$query);
-		
-		//If Insertion is successful
-		if($result){ 
-		
-			//Update Status Table 
-			updateStatusTable($temperature,$pressure,$humidity,$airQuality,$connection);
+		$result1 = mysqli_query($connection,$query1); //INSERT 'parameters' table
+		$result2 = mysqli_query($connection,$query2); //UPDATE 'real_time_parameters' table
 
-			//Return all flags as a response 
-		    returnFlags($connection);
-		    
+		if($result1){ //If Insertion in 'parameters' table is successful
+		    if($result2){ //If Insertion in 'real_time_parameters' table is successful
+		    	
+				updateStatusTable($temperature,$pressure,$humidity,$airQuality,$connection); //Update 'status' Table 
+
+			    returnFlags($connection); //Return all flags as a response 
+		    }
 		}
 		
 	}
-	else{
-		echo "error";
-	}
+
 
 	function returnFlags($connection){
 		$query = "SELECT * FROM flags";
@@ -56,8 +78,22 @@
 		    $row = mysqli_fetch_array($result);
 		    $sleep = $row['sleep'];
 		    $terminate = $row['terminate'];
-		    echo "{sleep: $sleep, terminate: $terminate}";
+		    echo '{"sleep": "'.$sleep.'", "terminate": "'.$terminate.'"}'; //This removes erron when pasring JSON object using response.json()
 		}
+	}
+
+	function isTerminated($connection){ //Checks if the terminate flag == 1, returns true if(terminate flag == 1)
+
+		$query = "SELECT * FROM flags";
+		$result = mysqli_query($connection,$query);
+		    
+		if($result){ // If the flags are successfully fetched
+		    $row = mysqli_fetch_array($result);
+		    $terminate = $row['terminate'];
+		    if($terminate == 1) return true;
+		}
+
+		return false;
 	}
 
 	function updateStatusTable($temperature,$pressure,$humidity,$airQuality,$connection){
