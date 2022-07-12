@@ -1,12 +1,4 @@
 <?php
-	//If there is any GET/POST data then only execute else exit
-	if(count($_REQUEST) == 0){
-	    http_response_code(400);
-	    exit(0);
-	}
-
-	$table_name = $_REQUEST['tableName'];
-
 	$file = fopen("../Configuration-Files/database.config", "r") or die("Unable to open database.config file!");
     $IP_ADDRESS = chop(fgets($file));
     $USER_NAME = chop(fgets($file));
@@ -14,14 +6,18 @@
     $DATABASE = chop(fgets($file));
 	$connection = mysqli_connect($IP_ADDRESS,$USER_NAME,$PASSWORD,$DATABASE);
 
-	$query = "TRUNCATE TABLE $table_name";
+	$query_truncate_parameters = "TRUNCATE TABLE parameters";
+	$query_truncate_status = "TRUNCATE TABLE status";
 
-	$result = mysqli_query($connection,$query);
-	
+	//Truncate status table first
+	$result = mysqli_query($connection,$query_truncate_status);
 	if($result){
-		http_response_code(200);
+
+		//Truncate parameters table afterwards due to foreign key
+		$result = mysqli_query($connection,$query_truncate_parameters);
+		if($result) http_response_code(200);
+		else http_response_code(400);
+
 	}
-	else{
-	    http_response_code(400);
-	}
+	else http_response_code(400);
 ?>
