@@ -11,7 +11,7 @@
 	    public $last_name;
 	    public $user_name;
 	    public $age;
-	    public $password;
+	    public $phone_number;
 	    public $isroot;
 	}
 		
@@ -45,6 +45,7 @@
 		}
 	}
 
+	//Retrun user details and store it in session object for 'catch.php' file so that a notification is sent on users phone number
 	function fetchAndReturnUserDetails($connection,$user_name){
 		 
 		$query = "SELECT u.id,u.first_name,u.last_name,u.user_name,u.age,u.phone_number,ru.isroot FROM users u LEFT OUTER JOIN root_users ru ON u.id = ru.id WHERE user_name='$user_name'";
@@ -59,7 +60,7 @@
 			$users->last_name = $row['last_name'];
 			$users->user_name = $row['user_name'];
 			$users->age = $row['age'];
-			$users->password = $row['phone_number'];
+			$users->phone_number = $row['phone_number'];
 			if($row['isroot'] == 1) $users->isroot = true;
 			else $users->isroot = false;
 
