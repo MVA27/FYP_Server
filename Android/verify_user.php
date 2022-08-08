@@ -44,8 +44,7 @@
 		    http_response_code(400);
 		}
 	}
-
-	//Retrun user details and store it in session object for 'catch.php' file so that a notification is sent on users phone number
+	
 	function fetchAndReturnUserDetails($connection,$user_name){
 		 
 		$query = "SELECT u.id,u.first_name,u.last_name,u.user_name,u.age,u.phone_number,ru.isroot FROM users u LEFT OUTER JOIN root_users ru ON u.id = ru.id WHERE user_name='$user_name'";

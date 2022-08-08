@@ -1,4 +1,10 @@
 <?php
+	//use 'composer require vonage/client' command To install API 
+	require_once 'vendor/autoload.php';
+
+	//Importatnt functions that displays error
+	// error_reporting(E_ALL);
+	// ini_set("display_errors",1);
 
 	/**
 	 * When this file is called (i.e catch.php) First check: 
@@ -61,7 +67,13 @@
 		if($result1){ //If Insertion in 'parameters' table is successful
 		    if($result2){ //If Insertion in 'real_time_parameters' table is successful
 		    	
-				updateStatusTable($temperature,$pressure,$humidity,$airQuality,$connection); //Update 'status' Table 
+				updateStatusTable($temperature,
+									$pressure,
+									$humidity,
+									$airQuality,
+									$connection,
+									"$day/$month/$year $hours:$minutes:$seconds"
+									); //Update 'status' Table 
 
 			    returnFlags($connection); //Return all flags as a response 
 		    }
@@ -96,7 +108,7 @@
 		return false;
 	}
 
-	function updateStatusTable($temperature,$pressure,$humidity,$airQuality,$connection){
+	function updateStatusTable($temperature,$pressure,$humidity,$airQuality,$connection,$date_time){
 		//STEP 1: Fetch the threshold first
 		$query = "SELECT * FROM threshold WHERE application='pb'";
 		$result = mysqli_query($connection,$query);
@@ -130,6 +142,25 @@
 		    }
 		    if($status_temperature == 1 || $status_pressure == 1 || $status_humidity == 1 || $status_airQuality == 1){
 		    	$status_overall = 1;
+		    }
+
+		    //STEP 2.1 : Send notification to user (via Vonage API)
+		    //Access the number of root user
+		    $query = "SELECT * FROM users u LEFT OUTER JOIN root_users ru ON u.id = ru.id WHERE isroot=1";
+			if($connection){
+		    	$result = mysqli_query($connection,$query);
+		    	$row = mysqli_fetch_array($result);
+		    	$phone_number = "91".$row['phone_number'];
+		    }
+
+		    //Send SMS
+		    if($status_overall == 1) {
+		    	$basic  = new \Vonage\Client\Credentials\Basic("bbbd316d", "10ZOlPuwnL7A69oQ");
+				$client = new \Vonage\Client($basic);
+
+				//TODO : check id number is not null
+				//$response = $client->sms()->send(new \Vonage\SMS\Message\SMS($phone_number, "RTEMS", "Threshold Exceeded at ".$date_time));
+				//$message = $response->current();
 		    }
 
 		    //STEP 3 : Prepare the query
