@@ -16,8 +16,9 @@
 	    
 	    $sleep = $row['sleep'];
 	    $terminate = $row['terminate'];
+	    $sms_service = $row['sms_service'];
 
-	    echo "{sleep: '$sleep', terminate: '$terminate'}";
+	    echo "{sleep: '$sleep', terminate: '$terminate', sms_service: '$sms_service'}";
 	    	
 		http_response_code(200);
 	

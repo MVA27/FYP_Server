@@ -35,14 +35,19 @@
     	$terminate = $_REQUEST['terminate'];
     	$query = $query . "terminate=".$terminate;
     }
+
+    if(array_key_exists('sms', $_REQUEST)){
+    	$sms = $_REQUEST['sms'];
+    	$query = $query . "sms_service=".$sms;
+    }
     
     $query = $query . " WHERE srno=1";
 
     //Set All Flags
 	$connection = mysqli_connect($IP_ADDRESS,$USER_NAME,$PASSWORD,$DATABASE);
 	$result = mysqli_query($connection,$query);
-	if($result){
-		
+
+	if($result){	
 		//if $terminate == 1 UPDATE 'real_time_parameters' table values to 0s
 		if($terminate == 1){
 			$query = "UPDATE real_time_parameters SET temperature=0,pressure=0,humidity=0,air_quality=-1 WHERE srno=1";
